@@ -55,7 +55,7 @@ class ManangeCoins:
 
             future_open_orders_count = self._get_open_orders_count(coin_pair)
 
-            if future_balance > threashold & future_open_orders_count == 0:
+            if future_balance > threashold and future_open_orders_count == 0:
                 amount = future_balance - threashold
                 self.logger.info("Should transfer %s of %s from Future to Spot", str(amount), target_coin)
 
