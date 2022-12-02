@@ -53,26 +53,30 @@ class ManangeCoins:
     def run(self):
         """Main entry point"""
 
+        self.logger.info(
+            "Threshold: $ %f, Minimum USD to withdraw: $ %f",
+            threashold,
+            minimum_withdraw_usd
+        )
+
         while True:
             print("===========", int(time.time()), "==========")
 
-            future_balance = self._get_future_balance(target_coin)
-            self.logger.info("%s balance of Future account: %f", target_coin, future_balance)
-
             target_coin_price = self._get_price(target_coin)
-            diff_amount = future_balance - threashold
-            diff_usd = diff_amount * target_coin_price
+
+            future_balance = self._get_future_balance(target_coin)
             self.logger.info(
-                "%s amount over threashold: %f %s ($ %f)",
+                "%s balance of Future: %f BUSD ($ %f)",
                 target_coin,
-                diff_amount,
-                target_coin,
-                diff_usd
+                future_balance,
+                future_balance * target_coin_price
             )
+
+            diff_amount = future_balance - threashold / target_coin_price
 
             future_open_orders_count = self._get_open_orders_count(coin_pair)
 
-            if diff_usd > minimum_withdraw_usd and future_open_orders_count == 0:
+            if future_balance * target_coin_price > threashold + minimum_withdraw_usd and future_open_orders_count == 0:
                 self.logger.info("Should transfer %f of %s from Future to Spot", diff_amount, target_coin)
 
                 self._transfer(target_coin, diff_amount)
