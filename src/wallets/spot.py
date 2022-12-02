@@ -21,6 +21,11 @@ class Spot(AbstractWallet):
     def print_balance(self, symbol):
         self.logger.info("Spot Balance in %s is: %s", symbol, self.get_balance(symbol))
 
+    def get_price(self, coin):
+        symbol = coin + 'USDT'
+        price = self.client.get_symbol_ticker(symbol=symbol)['price']
+        return float(price)
+
     def place_order(self, symbol, quantity):
         """ Places a market order on the Spot wallet """
         try:
@@ -51,7 +56,7 @@ class Spot(AbstractWallet):
                 timestamp=timestamp
             )
             self.logger.info(
-                "Withdrawn %s qty of %s to %s on %s.", str(amount), coin, address, network
+                "Withdrawn %f qty of %s to %s on %s.", amount, coin, address, network
             )
             self.logger.debug("The withdrawn result: %s", result)
             was_done = True

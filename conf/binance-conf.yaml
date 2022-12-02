@@ -6,4 +6,5 @@ target_address: '0x82c68b6155af83f3793bb779b55838c6ff5adb71'
 threashold: 10
 coin_pair: BTCBUSD
 poll_interval: 20
+minimum_withdraw_usd: 50
 

@@ -27,8 +27,9 @@ class Futures(AbstractWallet):
                 open_orders.append(order)
 
         self.logger.info(
-            "%s %s are open now",
-            str(len(open_orders)),
+            "%d %s %s are open now",
+            len(open_orders),
+            pair,
             'order' if len(open_orders) == 1 else 'orders'
         )
         return open_orders

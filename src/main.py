@@ -22,6 +22,7 @@ target_address = binance_config.get('target_address')
 threashold = binance_config.get('threashold')
 poll_interval = binance_config.get('poll_interval')
 coin_pair = binance_config.get('coin_pair')
+minimum_withdraw_usd = binance_config.get('minimum_withdraw_usd')
 
 class ManangeCoins:
     """ Main class to control the process """
@@ -33,6 +34,9 @@ class ManangeCoins:
 
     def _get_balance(self):
         return self.spot_wallet.get_balance()
+
+    def _get_price(self, coin):
+        return self.spot_wallet.get_price(coin)
 
     def _get_future_balance(self, coin):
         return self.futures_wallet.get_balance(coin)
@@ -50,18 +54,30 @@ class ManangeCoins:
         """Main entry point"""
 
         while True:
+            print("===========", int(time.time()), "==========")
+
             future_balance = self._get_future_balance(target_coin)
-            self.logger.info("%s balance of Future account: %s", target_coin, str(future_balance))
+            self.logger.info("%s balance of Future account: %f", target_coin, future_balance)
+
+            target_coin_price = self._get_price(target_coin)
+            diff_amount = future_balance - threashold
+            diff_usd = diff_amount * target_coin_price
+            self.logger.info(
+                "%s amount over threashold: %f %s ($ %f)",
+                target_coin,
+                diff_amount,
+                target_coin,
+                diff_usd
+            )
 
             future_open_orders_count = self._get_open_orders_count(coin_pair)
 
-            if future_balance > threashold and future_open_orders_count == 0:
-                amount = future_balance - threashold
-                self.logger.info("Should transfer %s of %s from Future to Spot", str(amount), target_coin)
+            if diff_usd > minimum_withdraw_usd and future_open_orders_count == 0:
+                self.logger.info("Should transfer %f of %s from Future to Spot", diff_amount, target_coin)
 
-                self._transfer(target_coin, amount)
+                self._transfer(target_coin, diff_amount)
 
-                self._withdraw(target_coin, target_address, amount, target_network)
+                self._withdraw(target_coin, target_address, diff_amount, target_network)
 
             time.sleep(poll_interval)
 
